@@ -10,7 +10,6 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = get_random_secret_key()
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
@@ -33,7 +32,7 @@ INSTALLED_APPS = [
     "corsheaders",
 
     "users",
-    "lms",
+    "habits",
 ]
 
 MIDDLEWARE = [
@@ -164,9 +163,9 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-CELERY_BEAT_SCHEDULE = {
-    'check-user-activity': {
-        'task': 'lms.tasks.check_user_activity',
-        'schedule': timedelta(days=1),
-    },
-}
+# CELERY_BEAT_SCHEDULE = {
+#     'check-user-activity': {
+#         'task': 'lms.tasks.check_user_activity',
+#         'schedule': timedelta(days=1),
+#     },
+# }
