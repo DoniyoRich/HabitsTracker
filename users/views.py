@@ -1,7 +1,10 @@
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import (CreateAPIView, DestroyAPIView,
+                                     ListAPIView, RetrieveAPIView,
+                                     UpdateAPIView)
 from rest_framework.permissions import AllowAny
 
 from users.models import CustomUser
+from users.permissions import IsModerator, IsOwner
 from users.serializers import UserSerializer, UserSerializerLimited
 
 
@@ -10,7 +13,7 @@ class UserRegisterView(CreateAPIView):
     API регистрации пользователя.
     """
     serializer_class = UserSerializer
-    queryset = CustomUser.objects.all()
+    # queryset = CustomUser.objects.all()
     permission_classes = [AllowAny]
 
     # def perform_create(self, serializer):
@@ -25,7 +28,7 @@ class UserListAPIView(ListAPIView):
     """
     serializer_class = UserSerializerLimited
     queryset = CustomUser.objects.all()
-    # permission_classes = [IsModerator]
+    permission_classes = [IsModerator | IsOwner]
 
 
 class UserDetailAPIView(RetrieveAPIView):
@@ -34,7 +37,7 @@ class UserDetailAPIView(RetrieveAPIView):
     """
     serializer_class = UserSerializerLimited
     queryset = CustomUser.objects.all()
-    # permission_classes = [IsModerator | IsOwner]
+    permission_classes = [IsModerator | IsOwner]
 
 
 class UserUpdateAPIView(UpdateAPIView):
@@ -43,7 +46,7 @@ class UserUpdateAPIView(UpdateAPIView):
     """
     serializer_class = UserSerializerLimited
     queryset = CustomUser.objects.all()
-    # permission_classes = [IsOwner]
+    permission_classes = [IsOwner]
 
 
 class UserDeleteAPIView(DestroyAPIView):
@@ -52,4 +55,4 @@ class UserDeleteAPIView(DestroyAPIView):
     """
     serializer_class = UserSerializer
     queryset = CustomUser.objects.all()
-    # permission_classes = [IsModerator]
+    permission_classes = [IsModerator]

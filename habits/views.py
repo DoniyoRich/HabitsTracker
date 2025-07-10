@@ -1,3 +1,21 @@
-from django.shortcuts import render
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 
-# Create your views here.
+
+class HabitsListAPIView(ListAPIView):
+    pass
+
+
+class HabitCreateAPIView(CreateAPIView):
+    pass
+
+
+class HabitDetailAPIView(RetrieveAPIView):
+    pass
+
+
+class HabitUpdateAPIView(UpdateAPIView):
+    pass
+
+
+class HabitDeleteAPIView(DestroyAPIView):
+    pass
