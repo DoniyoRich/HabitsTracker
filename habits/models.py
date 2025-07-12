@@ -63,7 +63,7 @@ class Habit(models.Model):
 
     def clean(self):
         """
-        Проверка взаимного исключения award и linked.
+        Проверка взаимного исключения award (вознаграждения) и linked (связанной привычки).
         """
 
         if self.award and self.linked:
