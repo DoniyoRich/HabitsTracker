@@ -1,5 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django_celery_beat.models import PeriodicTask
+
+from config import settings
+from habits.models import Habit
 
 
 class CustomUser(AbstractUser):
@@ -42,3 +46,12 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class UserHabitSchedule(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
+    task = models.ForeignKey(PeriodicTask, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.habit.activity}"

@@ -4,6 +4,7 @@ from rest_framework.generics import (CreateAPIView, DestroyAPIView,
 from rest_framework.permissions import AllowAny
 
 from users.models import CustomUser
+from users.paginators import UserPaginator
 from users.permissions import IsModerator, IsOwner
 from users.serializers import UserSerializer, UserSerializerLimited
 
@@ -28,6 +29,7 @@ class UserListAPIView(ListAPIView):
     """
     serializer_class = UserSerializerLimited
     queryset = CustomUser.objects.all()
+    pagination_class = UserPaginator
     permission_classes = [IsModerator | IsOwner]
 
 

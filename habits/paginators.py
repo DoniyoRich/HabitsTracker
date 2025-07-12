@@ -5,4 +5,4 @@ class HabitPaginator(PageNumberPagination):
     """
     Пагинатор для вывода ограниченного количества данных на странице.
     """
-    page_size = 3
+    page_size = 2
