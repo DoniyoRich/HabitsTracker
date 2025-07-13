@@ -1,10 +1,12 @@
+import logging
+
 import requests
 from celery import shared_task
 
 from config import settings
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 @shared_task
 def send_notification_to_telegram(chat_id, message=None):
