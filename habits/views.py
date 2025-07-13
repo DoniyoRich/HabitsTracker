@@ -3,7 +3,6 @@ from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      ListAPIView, RetrieveAPIView,
                                      UpdateAPIView)
 from rest_framework.response import Response
-from urllib3 import request
 
 from habits.models import Award, Habit
 from habits.paginators import HabitPaginator
@@ -21,7 +20,7 @@ class AllPublicHabitsListAPIView(ListAPIView):
     pagination_class = HabitPaginator
 
     def get_queryset(self):
-        return Habit.objects.filter(is_public=True).select_related('user', 'linked', 'award').order_by('time')
+        return Habit.objects.filter(is_public=True)
 
 
 class UserHabitsListAPIView(ListAPIView):
@@ -32,7 +31,7 @@ class UserHabitsListAPIView(ListAPIView):
     pagination_class = HabitPaginator
 
     def get_queryset(self):
-        return Habit.objects.filter(user=self.request.user)
+        return Habit.objects.filter(owner=self.request.user)
 
 
 class HabitCreateAPIView(CreateAPIView):
@@ -50,9 +49,8 @@ class HabitCreateAPIView(CreateAPIView):
         # Создаем расписание
         try:
             create_habit_schedule(
-                user=request.user,
-                habit=habit,
-                interval_minutes=habit.time    # !!!!
+                owner=request.user,
+                habit=habit
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:

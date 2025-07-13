@@ -1,9 +1,10 @@
 import requests
 from celery import shared_task
-from celery.beat import logger
 
 from config import settings
+import logging
 
+logger = logging.getLogger(__name__)
 
 @shared_task
 def send_notification_to_telegram(chat_id, message=None):
@@ -21,6 +22,7 @@ def send_notification_to_telegram(chat_id, message=None):
     try:
         response = requests.get(f"{settings.TELEGRAM_URL}{settings.TELEGRAM_BOT_TOKEN}/sendMessage", params=params)
         response.raise_for_status()
+        logger.info(f"Уведомление в Телеграм в chat_id {chat_id} успешно отправлено")
         return True
 
     except requests.RequestException as e:

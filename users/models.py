@@ -49,9 +49,9 @@ class CustomUser(AbstractUser):
 
 
 class UserHabitSchedule(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
     task = models.ForeignKey(PeriodicTask, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.user.email} - {self.habit.activity}"
+        return f"{self.owner.email} - {self.habit.activity}"

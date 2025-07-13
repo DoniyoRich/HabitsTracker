@@ -5,4 +5,4 @@ class UserPaginator(PageNumberPagination):
     """
     Пагинатор для вывода ограниченного количества данных на странице.
     """
-    page_size = 2
+    page_size = 5

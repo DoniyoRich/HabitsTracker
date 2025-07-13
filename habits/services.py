@@ -1,34 +1,44 @@
 import json
+from datetime import datetime
 
+from django.db import IntegrityError
 from django_celery_beat.models import IntervalSchedule, PeriodicTask
 
 from users.models import UserHabitSchedule
 
 
-def create_habit_schedule(user, habit, interval_minutes=1440):
+def create_habit_schedule(owner, habit):
     """
     Создает периодическую задачу с интервальным расписанием раз в сутки (24 часа=1440 минут)
     """
-    # Создаем интервал для повтора
-    schedule, _ = IntervalSchedule.objects.get_or_create(
-        every=interval_minutes,
-        period=IntervalSchedule.MINUTES,
-    )
+    try:
+        schedule, _ = IntervalSchedule.objects.get_or_create(
+            every=1440,
+            period=IntervalSchedule.MINUTES,
+            defaults={'every': 1440, 'period': IntervalSchedule.MINUTES}
+        )
+    except IntegrityError:
+        # если возникла ошибка уникальности — берем существующий интервал
+        schedule = IntervalSchedule.objects.filter(
+            every=1440,
+            period=IntervalSchedule.MINUTES
+        ).first()
 
-    # Создаем задачу для повторения
+    # создаем задачу для повторения
     task = PeriodicTask.objects.create(
         interval=schedule,
-        name=f'Напоминание о привычке "{habit.id}" для пользователя {user.email}',
+        name=f'Напоминание о привычке "{habit.activity}" для пользователя {owner.email}',
         task='habits.tasks.send_notification_to_telegram',
-        args=json.dumps([user.tg_chat_id]),
+        args=json.dumps([owner.tg_chat_id]),
         kwargs=json.dumps({
-            'message': f'Время выполнить: {habit.activity}'
+            'message': f'Время выполнить привычку: {habit.activity}'
         }),
-        start_time=habit.time,
+        start_time=datetime.now().replace(
+            hour=habit.time.hour,
+            minute=habit.time.minute),
         enabled=True
     )
 
-    # Сохраняем связь с пользователем
-    UserHabitSchedule.objects.create(user=user, habit=habit, task=task)
+    UserHabitSchedule.objects.create(owner=owner, habit=habit, task=task)
 
     return task

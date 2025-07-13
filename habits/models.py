@@ -27,7 +27,7 @@ class Habit(models.Model):
     Можно заполнить только одно из двух полей. В противном случае вызывается исключение.
     """
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                              verbose_name="Пользователь", null=True, blank=True)
     activity = models.CharField(max_length=100, verbose_name="Действие")
     time = models.TimeField(verbose_name="Время начала действия привычки")

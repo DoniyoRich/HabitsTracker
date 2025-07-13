@@ -12,8 +12,8 @@ app_name = HabitsConfig.name
 
 urlpatterns = [
     # эндпойнты для полезных привычек
-    path("public-habits/", AllPublicHabitsListAPIView.as_view(), name="all_public_habits_list"),
-    path("user-habits/", UserHabitsListAPIView.as_view(), name="user_habits_list"),
+    path("public/", AllPublicHabitsListAPIView.as_view(), name="all_public_habits_list"),
+    path("user/", UserHabitsListAPIView.as_view(), name="user_habits_list"),
     path("create/", HabitCreateAPIView.as_view(), name="habit_create"),
     path("update/<int:pk>/", HabitUpdateAPIView.as_view(), name="habit_update"),
     path("detail/<int:pk>/", HabitDetailAPIView.as_view(), name="habit_detail"),
