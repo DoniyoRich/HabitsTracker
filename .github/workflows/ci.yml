@@ -58,22 +58,20 @@ jobs:
 
       - name: Copy project files to server
         run: |
-          rsync -avvvz -e "ssh -o StrictHostKeyChecking=no" --exclude '__pycache__' \
-          ./* ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
-
-      - name: Setup Python environment
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} /bin/bash << 'EOF'
-            sudo apt-get update -qy
-            sudo apt-get install -y python3.12-venv python3-pip
-            cd ${{ secrets.DEPLOY_DIR }}
-            rm -rf venv
+          # 1. Проверяем содержимое локальной директории
+          echo "Files to sync:"
+          find . -type f | grep -v '__pycache__'
           
-            python3.12 -m venv venv
-            source venv/bin/activate
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-          EOF
+          # 2. Правильная команда rsync
+          rsync -avz \
+          --delete \
+          -e "ssh -o StrictHostKeyChecking=no" \
+          --exclude '__pycache__' \
+          ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
+          
+          # 3. Проверка на сервере
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} \
+          "ls -la ${{ secrets.DEPLOY_DIR }} | head -n 10"
 
       - name: Apply migrations on server
         run: |
