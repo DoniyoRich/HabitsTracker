@@ -58,10 +58,7 @@ jobs:
 
       - name: Copy project files to server
         run: |
-          rsync -avz \
-          -e "ssh -o StrictHostKeyChecking=no" \
-          --exclude '__pycache__' \
-          ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
+          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
 
       - name: Setup Python environment
         run: |
