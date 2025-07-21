@@ -56,23 +56,29 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Copy project files to server
-        run: |
-          rsync -avvvz -e "ssh -o StrictHostKeyChecking=no" --exclude '__pycache__' \
-          ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
-
       - name: Setup Python environment
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} /bin/bash << 'EOF'
-            sudo apt-get update -qy
-            sudo apt-get install -y python3.12-venv python3-pip
+          run: |
+            ls -la
+            
+            tar -czf deploy.tar.gz .
+            scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/tmp/
+            
+            ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}"
+            mkdir -p ${{ secrets.DEPLOY_DIR }}
+            tar -xzf /tmp/deploy.tar.gz -C ${{ secrets.DEPLOY_DIR }}
+            rm /tmp/deploy.tar.gz
+            ls -la ${{ secrets.DEPLOY_DIR }} "
+            
+            ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
             cd ${{ secrets.DEPLOY_DIR }}
-            rm -rf venv
-            python3.12 -m venv venv
+            if [ -f requirements.txt ]; then
+            python3 -m venv venv
             source venv/bin/activate
-            pip install --upgrade pip
             pip install -r requirements.txt
-          EOF
+            else
+            exit 1
+            fi
+            "
 
       - name: Apply migrations on server
         run: |
