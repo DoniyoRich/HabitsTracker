@@ -60,7 +60,8 @@ jobs:
         run: |
           rsync -avz \
           -e "ssh -o StrictHostKeyChecking=no" \
-          ./* ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
+          --exclude '__pycache__' \
+          ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}/
 
       - name: Setup Python environment
         run: |
