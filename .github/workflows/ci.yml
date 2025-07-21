@@ -62,15 +62,15 @@ jobs:
           --exclude '__pycache__' \
           . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
 
-
       - name: Install dependencies on server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
+            python3 -m pip install --user virtualenv
             cd ${{ secrets.DEPLOY_DIR }}
-            python3 -m venv venv
+            python3 -m virtualenv venv
             source venv/bin/activate
             pip install -r requirements.txt
-          EOF
+          "
 
       - name: Apply migrations on server
         run: |
