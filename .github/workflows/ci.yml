@@ -50,7 +50,7 @@ jobs:
           python-version: '3.12'
 
       - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.8.1
+        uses: shimataro/ssh-key-action@v2
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
