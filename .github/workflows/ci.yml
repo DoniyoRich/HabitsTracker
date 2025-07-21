@@ -56,29 +56,37 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Setup Python environment
-          run: |
-            ls -la
-            
-            tar -czf deploy.tar.gz .
-            scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/tmp/
-            
-            ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}"
+      - name: Deploy Application PROPERLY
+        run: |
+          # 1. Сначала проверим какие файлы есть локально
+          echo "Содержимое рабочей директории:"
+          ls -la
+          
+          # 2. Создаем архив и копируем его
+          tar -czf deploy.tar.gz .
+          scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/tmp/
+          
+          # 3. Распаковываем на сервере
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
             mkdir -p ${{ secrets.DEPLOY_DIR }}
             tar -xzf /tmp/deploy.tar.gz -C ${{ secrets.DEPLOY_DIR }}
             rm /tmp/deploy.tar.gz
-            ls -la ${{ secrets.DEPLOY_DIR }} "
-            
-            ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
+            echo 'Скопированные файлы:'
+            ls -la ${{ secrets.DEPLOY_DIR }}
+          "
+          
+          # 4. Устанавливаем зависимости
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
             cd ${{ secrets.DEPLOY_DIR }}
             if [ -f requirements.txt ]; then
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install -r requirements.txt
+              python3 -m venv venv
+              source venv/bin/activate
+              pip install -r requirements.txt
             else
-            exit 1
+              echo 'Файл requirements.txt не найден!'
+              exit 1
             fi
-            "
+          "
 
       - name: Apply migrations on server
         run: |
