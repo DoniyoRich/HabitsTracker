@@ -58,14 +58,30 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Log in Docker hub
-        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+      - name: Validate Docker Hub credentials
+        run: |
+          echo "Docker Hub Username: ${{ secrets.DOCKER_HUB_USERNAME }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          if [[ ! "${{ secrets.DOCKER_HUB_USERNAME }}" =~ ^[a-z0-9_]+$ ]]; then
+            echo "ERROR: Invalid Docker Hub username"
+            exit 1
+          fi
 
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} .
+      - name: Log in Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login \
+            -u "${{ secrets.DOCKER_HUB_USERNAME }}" \
+            --password-stdin
 
-      - name: Push Docker image in Docker hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+      - name: Build and push Docker image
+        run: |
+          IMAGE_TAG="${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}"
+          # Заменяем слэши на дефисы (если есть в SHA)
+          IMAGE_TAG=$(echo "$IMAGE_TAG" | tr '/' '-')
+          echo "Building image: $IMAGE_TAG"
+          
+          docker build -t "$IMAGE_TAG" .
+          docker push "$IMAGE_TAG"
 
   deploy:
     runs-on: ubuntu-latest
