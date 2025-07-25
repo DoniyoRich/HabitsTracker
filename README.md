@@ -2,8 +2,6 @@
 
 ## Деплой Django приложения с Docker, PostgreSQL и GitHub Actions
 
-### IP -  51.250.41.144/swagger/
-
 ### Описание проекта
   - Проект "Трекер привычек" автоматизирует процесс тестирования, сборки и деплоя Django приложения с использованием Docker, PostgreSQL и GitHub Actions CI/CD.
 
@@ -141,8 +139,6 @@ docker run --rm --env-file .env ваш_логин/myapp:тег python manage.py 
 docker run -d --name myapp --env-file .env -p 80:8000 ваш_логин/myapp:тег
 ```
 
-### Доступ к приложению
-После деплоя приложение доступно по IP сервера:  51.250.41.144 на порту 80.
 
 
 [Doniyor Ishanov. ](#) - [SkyPro IT School](#)
