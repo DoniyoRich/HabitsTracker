@@ -31,13 +31,11 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 #### Установка и настройка PostgreSQL
-
 ```
 sudo apt install -y postgresql postgresql-contrib
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
 ```
-
 #### Создание пользователя и БД:
 
 ```
@@ -50,7 +48,6 @@ CREATE USER youruser WITH PASSWORD 'yourpassword';
 GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
 \q
 ```
-
 #### Настройка доступа:
 
 ```
