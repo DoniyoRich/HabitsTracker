@@ -80,10 +80,13 @@ jobs:
 
       - name: Deploy to server
         run: |
-          scp -o StrictHostKeyChecking=no .env ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user1/habits/.env
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
           docker stop myapp || true
           docker rm myapp || true
-          docker run -d --name myapp -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+          docker run -d \
+            --name myapp \
+            --env-file /home/user1/habits/.env \  # Вот ключевое изменение!
+            -p 80:8000 \
+            ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
           EOF
