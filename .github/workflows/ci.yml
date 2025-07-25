@@ -86,7 +86,7 @@ jobs:
           docker rm myapp || true
           docker run -d \
             --name myapp \
-            --env-file /home/user1/habits/.env \  # Вот ключевое изменение!
+            --env-file /home/user1/habits/.env \
             -p 80:8000 \
             ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
           EOF
