@@ -83,11 +83,15 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
           
-          # Запускаем миграции во временном контейнере
+          
           docker run --rm \
           --env-file /home/user1/habits/.env \
           ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} \
-          python manage.py makemigrations
+          python manage.py makemigrations --noinput
+          
+          docker run --rm \
+          --env-file /home/user1/habits/.env \
+          ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} \
           python manage.py migrate --no-input
           
           docker stop myapp || true
