@@ -3,6 +3,7 @@
 .env
 .venv/
 venv/
+.idea/
 __pycache__/
 *.pyc
-test_db.sqlite3
+
