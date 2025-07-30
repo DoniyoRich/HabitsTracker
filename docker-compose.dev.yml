@@ -1,0 +1,88 @@
+services:
+  db:
+    image: postgres:17
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:6
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "6379:6379"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+#    environment:
+#      DEBUG: "True"
+#      CELERY_BROKER_URL: redis://redis:6379/0
+    command: >
+      bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+
+#  celery:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    command: celery -A config worker -l INFO
+#    environment:
+#      CELERY_BROKER_URL: redis://redis:6379/0
+#    volumes:
+#      - .:/app
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#    restart: always
+#
+#  celery_beat:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    command: celery -A config beat -l INFO -S django
+#    environment:
+#      CELERY_BROKER_URL: redis://redis:6379/0
+#    volumes:
+#      - .:/app
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#      celery:
+#        condition: service_started
+#    restart: always
+
+volumes:
+  postgres_data:
+  redis_data:
