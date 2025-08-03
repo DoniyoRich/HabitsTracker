@@ -9,7 +9,7 @@ from config import settings
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="API документация по проекту: ТРЕКЕР ПРИВЫЧЕК",
+        title="API документация по проекту: Трекер привычек",
         default_version='v1',
         description="HabitsTracker API description",
         terms_of_service="https://www.example.com/policies/terms/",
