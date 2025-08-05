@@ -81,16 +81,18 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Copy docker-compose.yml to server
+      - name: Copy project files to server
         run: |
-          scp -o StrictHostKeyChecking=no \
-            ./docker-compose.yml \
-            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user1/habits/docker-compose.yml
+          rsync -avz \
+            --exclude='.git/' \
+            --exclude='__pycache__/' \
+            --exclude='.env' \
+            --exclude='*.pyc' \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user1/habits/
 
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          # Add user to docker group if needed
           sudo usermod -aG docker $USER || true
           sudo systemctl restart docker || true
 
