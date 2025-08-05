@@ -76,6 +76,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install rsync and sshpass (if needed)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync sshpass
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -83,10 +88,10 @@ jobs:
 
       - name: Copy project files to server
         run: |
-          rsync -avz \
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             --exclude='.git/' \
             --exclude='__pycache__/' \
-            --exclude='.env' \
             --exclude='*.pyc' \
             ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user1/habits/
 
