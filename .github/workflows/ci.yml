@@ -73,16 +73,31 @@ jobs:
     needs: build
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Copy docker-compose.yml to server
+        run: |
+          scp -o StrictHostKeyChecking=no \
+            ./docker-compose.yml \
+            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user1/habits/docker-compose.yml
+
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          # Add user to docker group if needed
           sudo usermod -aG docker $USER || true
           sudo systemctl restart docker || true
+
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
 
           cd /home/user1/habits
 
@@ -98,7 +113,6 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }} \
             python manage.py migrate --no-input
 
-          # Update and restart services
           docker-compose down
           docker-compose up -d
           EOF
