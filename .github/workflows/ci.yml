@@ -81,20 +81,24 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          sudo usermod -aG docker $USER || true
+          sudo systemctl restart docker || true
+
           cd /home/user1/habits
-          
+
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }}
-          
+
           docker run --rm \
             --env-file .env \
             ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }} \
             python manage.py makemigrations --noinput
-          
+
           docker run --rm \
             --env-file .env \
             ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }} \
             python manage.py migrate --no-input
-          
+
+          # Update and restart services
           docker-compose down
           docker-compose up -d
           EOF
