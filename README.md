@@ -1,8 +1,8 @@
-# Домашнее задание 35.2 CI/CD и GitHub Actions
+# Итоговое задание Курса 9.
 
-## Деплой Django приложения с Docker, PostgreSQL и GitHub Actions
+## Деплой DRF приложения с Docker, PostgreSQL и GitHub Actions
 
-### IP -  51.250.41.144/swagger/
+### IP -  http://158.160.178.150/swagger/
 
 ### Описание проекта
   - Проект "Трекер привычек" автоматизирует процесс тестирования, сборки и деплоя Django приложения с использованием Docker, PostgreSQL и GitHub Actions CI/CD.
@@ -120,26 +120,9 @@ Docker образ
   - Настройку прав для статических файлов
   - Запуск Gunicorn
 
-### Ручной деплой
-Получение образа:
-
-```
-docker pull ваш_логин/myapp:тег
-```
-
-Миграции:
-```
-docker run --rm --env-file .env ваш_логин/myapp:тег python manage.py migrate
-```
-
-Запуск:
-
-```
-docker run -d --name myapp --env-file .env -p 80:8000 ваш_логин/myapp:тег
-```
 
 ### Доступ к приложению
-После деплоя приложение доступно по IP сервера:  51.250.41.144 на порту 80.
+После деплоя приложение доступно по IP сервера (документация):  http://158.160.178.150/swagger/.
 
 
 [Doniyor Ishanov. ](#) - [SkyPro IT School](#)
