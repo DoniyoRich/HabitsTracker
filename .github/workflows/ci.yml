@@ -62,10 +62,10 @@ jobs:
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }} .
 
       - name: Push Docker image in Docker hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }}
 
 
   deploy:
@@ -73,32 +73,53 @@ jobs:
     needs: build
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install rsync and sshpass (if needed)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync sshpass
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Copy project files to server
+        run: |
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+            --exclude='.git/' \
+            --exclude='__pycache__/' \
+            --exclude='*.pyc' \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/user1/habits/
+
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
-          
-          
+          sudo usermod -aG docker $USER || true
+          sudo systemctl restart docker || true
+
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+
+          cd /home/user1/habits
+
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }}
+
           docker run --rm \
-          --env-file /home/user1/habits/.env \
-          ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} \
-          python manage.py makemigrations --noinput
-          
+            --env-file .env \
+            ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }} \
+            python manage.py makemigrations --noinput
+
           docker run --rm \
-          --env-file /home/user1/habits/.env \
-          ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} \
-          python manage.py migrate --no-input
-          
-          docker stop myapp || true
-          docker rm myapp || true
-          docker run -d \
-            --name myapp \
-            --env-file /home/user1/habits/.env \
-            -p 80:8000 \
-            ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+            --env-file .env \
+            ${{ secrets.DOCKER_HUB_USERNAME }}/habits:${{ github.sha }} \
+            python manage.py migrate --no-input
+
+          docker-compose down
+          docker-compose up -d
           EOF
